@@ -23,8 +23,8 @@
     "prepublish": "pnpm build",
     "postversion": "git push && git push --tags",
     "publish:major": "pnpm version && pnpm publish",
-    "publish:minor": "pnpm version:minor && pnpm publish",
-    "publish:patch": "pnpm version:patch && pnpm publish"
+    "publish:minor": "pnpm version minor && pnpm publish",
+    "publish:patch": "pnpm version patch && pnpm publish"
   },
   "devDependencies": {
     "@sassy-js/vanilla": "^1.1.2",
