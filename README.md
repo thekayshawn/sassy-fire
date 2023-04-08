@@ -15,9 +15,11 @@ Sassy Fire is a powerful library of tools designed to help you build sleek and s
 To get started with Sassy Fire, simply follow these steps:
 
 1. Install Sassy Fire using your favorite package manager:
+
 ```bash
 npm install @sassy-js/fire
 ```
+
 2. Create a new Firebase project, or use an existing one.
 3. Follow the prompts to configure Sassy Fire for your project.
 4. Start building your app with Firebase and Sassy Fire!

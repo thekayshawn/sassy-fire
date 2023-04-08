@@ -1,0 +1,40 @@
+{
+  "name": "@sassy-js/fire",
+  "private": "false",
+  "version": "0.0.0",
+  "description": "Sassy Fire is a powerful library of tools designed to help you build sleek and stylish applications with Firebase. With Sassy Fire, you can create dynamic, scalable, and performant apps that are sure to impress your users.",
+  "main": "src/index.ts",
+  "keywords": [],
+  "author": {
+    "name": "Kashan Ahmad",
+    "url": "https://kashanahmad.me",
+    "email": "kashan.aech.620@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kashan-ahmad/sassy-fire"
+  },
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "pnpm lint:fix && prettier --write .",
+    "build": "pnpm format && tsc",
+    "prepublish": "pnpm build",
+    "postversion": "git push && git push --tags",
+    "publish:major": "pnpm version && pnpm publish",
+    "publish:minor": "pnpm version:minor && pnpm publish",
+    "publish:patch": "pnpm version:patch && pnpm publish"
+  },
+  "devDependencies": {
+    "@sassy-js/vanilla": "^1.1.2",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.7",
+    "typescript": "^5.0.4"
+  }
+}
