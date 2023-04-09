@@ -18,16 +18,16 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "pnpm lint:fix && prettier --write .",
-    "build": "pnpm format && tsc",
-    "prepublish": "pnpm build",
-    "postversion": "git push && git push --tags",
-    "publish:major": "pnpm version && pnpm publish",
-    "publish:minor": "pnpm version minor && pnpm publish",
-    "publish:patch": "pnpm version patch && pnpm publish"
+    "format": "npm run lint:fix && prettier --write .",
+    "build": "npm run format && tsc",
+    "release:migrate": "cp package.json LICENSE README.md dist",
+    "release:version": "npm version patch && npm run release:migrate",
+    "release:prepare": "npm run build && npm run release:version",
+    "release:tags": "git push && git push --tags",
+    "release": "npm run release:prepare && cd dist && npm publish --access=public && cd .. && npm run release:tags"
   },
   "devDependencies": {
-    "@sassy-js/vanilla": "^1.1.2",
+    "@sassy-js/vanilla": "^0.0.8",
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
@@ -36,5 +36,13 @@
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.7",
     "typescript": "^5.0.4"
-  }
+  },
+  "dependencies": {
+    "firebase": "^9.19.1"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ]
 }
