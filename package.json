@@ -1,7 +1,6 @@
 {
   "name": "@sassy-js/fire",
-  "private": "false",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Sassy Fire is a powerful library of tools designed to help you build sleek and stylish applications with Firebase. With Sassy Fire, you can create dynamic, scalable, and performant apps that are sure to impress your users.",
   "main": "src/index.ts",
   "keywords": [],
@@ -21,13 +20,14 @@
     "format": "npm run lint:fix && prettier --write .",
     "build": "npm run format && tsc",
     "release:migrate": "cp package.json LICENSE README.md dist",
-    "release:version": "npm version patch && npm run release:migrate",
+    "release:version": "npx changeset version && npm run release:migrate",
     "release:prepare": "npm run build && npm run release:version",
     "release:tags": "git push && git push --tags",
-    "release": "npm run release:prepare && cd dist && npm publish --access=public && cd .. && npm run release:tags"
+    "release": "npm run release:prepare && cd dist && npm publish --access=public"
   },
   "devDependencies": {
-    "@sassy-js/vanilla": "^0.0.8",
+    "@changesets/cli": "^2.26.1",
+    "@sassy-js/vanilla": "^0.0.11",
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",

@@ -1,233 +1,131 @@
-import strings from './strings'
-import { initializeApp } from 'firebase/app'
-import { BoolBacks, Channel, Message, NewMessage, SassyUser } from './types'
-import {
-  doc,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  arrayUnion,
-  collection,
-  getFirestore,
-  onSnapshot,
-  Unsubscribe,
-  addDoc,
-  orderBy,
-  getDoc,
-} from 'firebase/firestore'
+import { strings, BoolBacks } from '@sassy-js/vanilla'
+
+import { FirebaseApp, initializeApp } from 'firebase/app'
+import { getFirestore, Firestore } from 'firebase/firestore'
 import {
   User,
+  Auth,
+  signOut,
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-  signOut,
 } from 'firebase/auth'
-import {
-  isChannel,
-  isMessage,
-  parseChannelsFromDocs,
-  parseMessagesFromDocs,
-} from './utils'
-import { getChannelUserFromUser } from './userConverter'
 
-const firebaseConfig = {
-  appId: import.meta.env.VITE_APP_ID,
-  apiKey: import.meta.env.VITE_API_KEY,
-  projectId: import.meta.env.VITE_PROJECT_ID,
-  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
-  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
-  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+// Initialization.
+let firebaseApp: FirebaseApp
+let firestoreDb: Firestore
+let firestoreAuth: Auth
+const firestorAuthProvider = new GoogleAuthProvider()
+
+/**
+ * Sets up the Firebase client.
+ *
+ * @param config Firebase config.
+ *
+ * @returns void
+ *
+ * @example
+ * ```ts
+ * setupFirebase({
+ *  appId: '...',
+ *  apiKey: '...',
+ *  projectId: '...',
+ *  authDomain: '...',
+ *  measurementId: '...',
+ *  storageBucket: '...',
+ *  messagingSenderId: '...',
+ * })
+ * ```
+ */
+export function setupFirebase(config: {
+  appId: string
+  apiKey: string
+  projectId: string
+  authDomain: string
+  measurementId: string
+  storageBucket: string
+  messagingSenderId: string
+}) {
+  // Initialize Firebase.
+  firebaseApp = initializeApp(config)
+
+  // Get the Firestore database and auth.
+  firestoreDb = getFirestore(firebaseApp)
+  firestoreAuth = getAuth(firebaseApp)
+
+  // Return the Firestore essentials.
+  return {
+    firebaseApp,
+    firestoreDb,
+    firestoreAuth,
+    firestorAuthProvider,
+  }
 }
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig)
-export const db = getFirestore(app)
-export const auth = getAuth(app)
-export const authProvider = new GoogleAuthProvider()
-let unsubscribe: Unsubscribe
+function throwFirebaseSetupError() {
+  throw new Error(
+    'SassyFireError: You must call setupFirebase() before using any other functions.'
+  )
+}
 
-// Auth
-export function loginWithGoogle({
-  onFailure,
-}: {
-  onFailure: BoolBacks<SassyUser['data']>['onFailure']
-}) {
-  signInWithPopup(auth, authProvider)
+function isFirebaseSetup() {
+  return firebaseApp && firestoreDb && firestoreAuth
+}
+
+/**
+ * Logs in a user with Google's pre-built popup.
+ *
+ * @param onSuccess Callback for when the user is successfully logged in.
+ * @param onFailure Callback for when the user fails to log in.
+ *
+ * @returns void
+ *
+ * @example
+ * ```ts
+ * loginWithGoogle({
+ *  onSuccess: (user) => {
+ *   console.log(user)
+ *  },
+ *  onFailure: (error) => {
+ *   console.error(error)
+ *  }
+ * })
+ * ```
+ */
+export function loginWithGoogle({ onSuccess, onFailure }: BoolBacks<User>) {
+  if (!isFirebaseSetup()) throwFirebaseSetupError()
+
+  signInWithPopup(firestoreAuth, firestorAuthProvider)
     .then((result) => {
       const credentials = GoogleAuthProvider.credentialFromResult(result)
 
-      if (!credentials) throw new Error(strings.DEFAULT_ERROR)
+      if (!credentials) throw new Error(strings.DEFAULT_ERROR_MESSAGE)
+
+      onSuccess(result.user)
     })
     .catch((error) => {
       console.error(error)
-      onFailure(strings.DEFAULT_ERROR)
+
+      onFailure({
+        error,
+        message: strings.DEFAULT_ERROR_MESSAGE,
+      })
     })
 }
 
 export function logout({
   onFailure,
 }: {
-  onFailure: BoolBacks<any>['onFailure']
+  onFailure: BoolBacks<unknown>['onFailure']
 }) {
-  signOut(auth).catch((reason) => {
+  if (!isFirebaseSetup()) throwFirebaseSetupError()
+
+  signOut(firestoreAuth).catch((reason) => {
     console.error(reason)
-    onFailure(strings.DEFAULT_ERROR)
-  })
-}
 
-// Channels
-export function addUserToGlobalChannel({
-  user,
-  onSuccess,
-  onFailure,
-}: { user: User } & BoolBacks<any>) {
-  const globalChannelDoc = doc(db, 'channels', 'global')
-
-  // Get the global channel.
-  getDoc(globalChannelDoc).then((docSnapshot) => {
-    const globalChannel: unknown = docSnapshot.data()
-
-    // Type guard.
-    if (isChannel(globalChannel)) {
-      // If the user already exists.
-      if (globalChannel.users[user.uid]) {
-        onSuccess(true)
-        return
-      }
-
-      // Otherwise, add the user.
-      updateDoc(globalChannelDoc, {
-        [`users.${user.uid}`]: getChannelUserFromUser(user),
-      })
-        .then(onSuccess)
-        .catch((error) => {
-          console.error(error)
-          onFailure(strings.DEFAULT_ERROR)
-        })
-
-      return
-    }
-
-    console.error("TypeScriptError: doc isn't of type Channel")
-    onFailure(strings.DEFAULT_ERROR)
-  })
-}
-
-/**
- * Get the channels associated with a user.
- */
-export function getUserChannels({
-  user,
-  onSuccess,
-  onFailure,
-}: { user: User } & BoolBacks<Channel[]>) {
-  const channelsCollection = collection(db, 'channels')
-
-  // Select channels where `users.uid` isn't empty.
-  // In other words, channels with the current user in their users.
-  const queryRef = query(
-    channelsCollection,
-    where(`users.${user.uid}`, '!=', '')
-  )
-
-  getDocs(queryRef)
-    .then((docs) =>
-      parseChannelsFromDocs({
-        docs,
-        onSuccess,
-        onFailure,
-      })
-    )
-    .catch((error) => {
-      console.error(error)
-      onFailure(strings.DEFAULT_ERROR)
-    })
-}
-
-/**
- * Get messages of a channel.
- */
-export function getChannelMessages({
-  channel,
-  onSuccess,
-  onFailure,
-}: {
-  channel: Channel
-} & BoolBacks<Message[]>) {
-  const messagesCollection = collection(db, 'channels', channel.id, 'messages')
-
-  getDocs(query(messagesCollection))
-    .then((docs) =>
-      parseMessagesFromDocs({
-        docs,
-        onSuccess,
-        onFailure,
-      })
-    )
-    .catch((error) => {
-      console.error(error)
-      onFailure(strings.DEFAULT_ERROR)
-    })
-}
-
-/**
- * Add a message to a channel's message collection.
- */
-export function sendMessageToChannel({
-  channel,
-  message,
-  onSuccess,
-  onFailure,
-}: BoolBacks<any> & {
-  message: NewMessage
-  channel: Channel
-}) {
-  const messagesCollection = collection(db, 'channels', channel.id, 'messages')
-
-  addDoc(messagesCollection, message)
-    .then(onSuccess)
-    .catch((error) => {
-      console.error(error)
-      onFailure(strings.DEFAULT_ERROR)
-    })
-}
-
-/**
- * Subscribes to a channel for real-time updates.
- */
-export function subscribeUserToChannel({
-  user,
-  channel,
-  onSuccess,
-  onFailure,
-}: {
-  user: User
-  channel: Channel
-} & BoolBacks<Message[]>) {
-  const messagesCollection = collection(db, 'channels', channel.id, 'messages')
-
-  const messagesQuery = query(
-    messagesCollection,
-    orderBy('createdAt'),
-    where('createdAt', '>=', channel.users[user.uid].addedAt)
-  )
-
-  // Instantiate the listener on the messages collection.
-  unsubscribe = onSnapshot(messagesQuery, (docs) => {
-    parseMessagesFromDocs({
-      docs,
-      onSuccess,
-      onFailure,
+    onFailure({
+      error: reason,
+      message: strings.DEFAULT_ERROR_MESSAGE,
     })
   })
-}
-
-/**
- * Unsubscribes from a subscribed channel. Since multi-channel subscription
- * isn't yet supported, the default subscribed channel is unsubscribed from.
- */
-export function unsubscribeFromChannel() {
-  unsubscribe()
 }
