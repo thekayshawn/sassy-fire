@@ -17,17 +17,20 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "npm run lint:fix && prettier --write .",
-    "build": "npm run format && tsc",
+    "format": "pnpm run lint:fix && prettier --write .",
+    "dev": "tsc -w",
+    "build": "pnpm run format && tsc",
     "release:migrate": "cp package.json LICENSE README.md CHANGELOG.md CONTRIBUTING.md dist",
-    "release:version": "npx changeset version && npm run release:migrate",
-    "release:prepare": "npm run build && npm run release:version",
+    "release:version": "npx changeset version && pnpm run release:migrate",
+    "release:prepare": "pnpm run build && pnpm run release:version",
     "release:tags": "git push && git push --tags",
-    "release": "npm run release:prepare && cd dist && npm publish --access=public"
+    "release": "pnpm run release:prepare && cd dist && pnpm publish --access=public"
   },
   "devDependencies": {
+    "@sassy-js/utils": "workspace:*",
+    "@sassy-js/tsconfig": "workspace:*",
+    "@sassy-js/eslint-config": "workspace:*",
     "@changesets/cli": "^2.26.1",
-    "@sassy-js/utils": "^1.0.0",
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
@@ -39,10 +42,5 @@
   },
   "dependencies": {
     "firebase": "^9.19.1"
-  },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md"
-  ]
+  }
 }

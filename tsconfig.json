@@ -1,5 +1,7 @@
 {
+  "extends": "@sassy-js/tsconfig/base.json",
   "compilerOptions": {
+    "rootDir": "src",
     "target": "ESNext",
     "module": "CommonJS",
     "outDir": "dist",

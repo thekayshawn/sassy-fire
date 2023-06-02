@@ -14,7 +14,7 @@ import {
 let firebaseApp: FirebaseApp;
 let firestoreDb: Firestore;
 let firestoreAuth: Auth;
-const firestorAuthProvider = new GoogleAuthProvider();
+const firestoreAuthProvider = new GoogleAuthProvider();
 
 /**
  * Sets up the Firebase client.
@@ -57,7 +57,7 @@ export function setupFirebase(config: {
     firebaseApp,
     firestoreDb,
     firestoreAuth,
-    firestorAuthProvider,
+    firestoreAuthProvider,
   };
 }
 
@@ -94,7 +94,7 @@ function isFirebaseSetup() {
 export function loginWithGoogle({ onSuccess, onFailure }: BoolBacks<User>) {
   if (!isFirebaseSetup()) throwFirebaseSetupError();
 
-  signInWithPopup(firestoreAuth, firestorAuthProvider)
+  signInWithPopup(firestoreAuth, firestoreAuthProvider)
     .then((result) => {
       const credentials = GoogleAuthProvider.credentialFromResult(result);
 
