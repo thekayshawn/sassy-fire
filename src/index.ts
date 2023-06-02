@@ -1,7 +1,6 @@
-import { strings, BoolBacks } from '@sassy-js/vanilla'
-
-import { FirebaseApp, initializeApp } from 'firebase/app'
-import { getFirestore, Firestore } from 'firebase/firestore'
+import { strings, BoolBacks } from "@sassy-js/utils";
+import { FirebaseApp, initializeApp } from "firebase/app";
+import { getFirestore, Firestore } from "firebase/firestore";
 import {
   User,
   Auth,
@@ -9,13 +8,13 @@ import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-} from 'firebase/auth'
+} from "firebase/auth";
 
 // Initialization.
-let firebaseApp: FirebaseApp
-let firestoreDb: Firestore
-let firestoreAuth: Auth
-const firestorAuthProvider = new GoogleAuthProvider()
+let firebaseApp: FirebaseApp;
+let firestoreDb: Firestore;
+let firestoreAuth: Auth;
+const firestorAuthProvider = new GoogleAuthProvider();
 
 /**
  * Sets up the Firebase client.
@@ -38,20 +37,20 @@ const firestorAuthProvider = new GoogleAuthProvider()
  * ```
  */
 export function setupFirebase(config: {
-  appId: string
-  apiKey: string
-  projectId: string
-  authDomain: string
-  measurementId: string
-  storageBucket: string
-  messagingSenderId: string
+  appId?: string;
+  apiKey?: string;
+  projectId?: string;
+  authDomain?: string;
+  measurementId?: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
 }) {
   // Initialize Firebase.
-  firebaseApp = initializeApp(config)
+  firebaseApp = initializeApp(config);
 
   // Get the Firestore database and auth.
-  firestoreDb = getFirestore(firebaseApp)
-  firestoreAuth = getAuth(firebaseApp)
+  firestoreDb = getFirestore(firebaseApp);
+  firestoreAuth = getAuth(firebaseApp);
 
   // Return the Firestore essentials.
   return {
@@ -59,17 +58,17 @@ export function setupFirebase(config: {
     firestoreDb,
     firestoreAuth,
     firestorAuthProvider,
-  }
+  };
 }
 
 function throwFirebaseSetupError() {
   throw new Error(
-    'SassyFireError: You must call setupFirebase() before using any other functions.'
-  )
+    "SassyFireError: You must call setupFirebase() before using any other functions."
+  );
 }
 
 function isFirebaseSetup() {
-  return firebaseApp && firestoreDb && firestoreAuth
+  return firebaseApp && firestoreDb && firestoreAuth;
 }
 
 /**
@@ -93,39 +92,39 @@ function isFirebaseSetup() {
  * ```
  */
 export function loginWithGoogle({ onSuccess, onFailure }: BoolBacks<User>) {
-  if (!isFirebaseSetup()) throwFirebaseSetupError()
+  if (!isFirebaseSetup()) throwFirebaseSetupError();
 
   signInWithPopup(firestoreAuth, firestorAuthProvider)
     .then((result) => {
-      const credentials = GoogleAuthProvider.credentialFromResult(result)
+      const credentials = GoogleAuthProvider.credentialFromResult(result);
 
-      if (!credentials) throw new Error(strings.DEFAULT_ERROR_MESSAGE)
+      if (!credentials) throw new Error(strings.DEFAULT_ERROR_MESSAGE);
 
-      onSuccess(result.user)
+      onSuccess(result.user);
     })
     .catch((error) => {
-      console.error(error)
+      console.error(error);
 
       onFailure({
         error,
         message: strings.DEFAULT_ERROR_MESSAGE,
-      })
-    })
+      });
+    });
 }
 
 export function logout({
   onFailure,
 }: {
-  onFailure: BoolBacks<unknown>['onFailure']
+  onFailure: BoolBacks<unknown>["onFailure"];
 }) {
-  if (!isFirebaseSetup()) throwFirebaseSetupError()
+  if (!isFirebaseSetup()) throwFirebaseSetupError();
 
   signOut(firestoreAuth).catch((reason) => {
-    console.error(reason)
+    console.error(reason);
 
     onFailure({
       error: reason,
       message: strings.DEFAULT_ERROR_MESSAGE,
-    })
-  })
+    });
+  });
 }

@@ -1,6 +1,6 @@
 {
   "name": "@sassy-js/fire",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Sassy Fire is a powerful library of tools designed to help you build sleek and stylish applications with Firebase. With Sassy Fire, you can create dynamic, scalable, and performant apps that are sure to impress your users.",
   "main": "src/index.ts",
   "keywords": [],
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
-    "@sassy-js/vanilla": "^0.0.11",
+    "@sassy-js/utils": "^1.0.0",
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",

@@ -1,5 +1,11 @@
 # Contributing
 
+## 1.0.1
+
+### Patch Changes
+
+- updated setupFirebase to allow optional params
+
 ## 1.0.0
 
 ### Major Changes
