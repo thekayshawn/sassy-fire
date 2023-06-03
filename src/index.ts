@@ -112,19 +112,17 @@ export function loginWithGoogle({ onSuccess, onFailure }: BoolBacks<User>) {
     });
 }
 
-export function logout({
-  onFailure,
-}: {
-  onFailure: BoolBacks<unknown>["onFailure"];
-}) {
+export function logout({ onSuccess, onFailure }: BoolBacks<unknown>) {
   if (!isFirebaseSetup()) throwFirebaseSetupError();
 
-  signOut(firestoreAuth).catch((reason) => {
-    console.error(reason);
+  signOut(firestoreAuth)
+    .then(() => onSuccess(undefined))
+    .catch((reason) => {
+      console.error(reason);
 
-    onFailure({
-      error: reason,
-      message: strings.DEFAULT_ERROR_MESSAGE,
+      onFailure({
+        error: reason,
+        message: strings.DEFAULT_ERROR_MESSAGE,
+      });
     });
-  });
 }

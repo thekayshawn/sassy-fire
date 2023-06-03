@@ -24,7 +24,8 @@
     "release:version": "npx changeset version && pnpm run release:migrate",
     "release:prepare": "pnpm run build && pnpm run release:version",
     "release:tags": "git push && git push --tags",
-    "release": "pnpm run release:prepare && cd dist && pnpm publish --access=public"
+    "release": "pnpm run release:prepare && cd dist && pnpm publish --access=public",
+    "clean": "rm -rf node_modules && rm -rf pnpm-lock.yaml"
   },
   "devDependencies": {
     "@sassy-js/utils": "workspace:*",
