@@ -1,5 +1,11 @@
 # Contributing
 
+## 1.1.0
+
+### Minor Changes
+
+- 98d4725: Added login and logout functions
+
 ## 1.0.1
 
 ### Patch Changes
