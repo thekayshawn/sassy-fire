@@ -135,6 +135,8 @@ export function observeUser({
   onLogin: (user: User) => unknown;
   onLogout: () => unknown;
 }) {
+  if (!isFirebaseSetup()) throwFirebaseSetupError();
+
   onAuthStateChanged(firestoreAuth, (user) => {
     // Logged in.
     if (user) {
