@@ -1,5 +1,11 @@
 # Contributing
 
+## 1.2.0
+
+### Minor Changes
+
+- 1e3770a: added prompt field and modal to wahm. Added a useUser hook to sassy-react for easy access to the user's data. added a user observer for sassy-fire to observe the user in real-time.
+
 ## 1.1.0
 
 ### Minor Changes
