@@ -12,6 +12,12 @@ import {
   signInWithEmailAndPassword,
   signInAnonymously,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateEmail,
+  updatePassword,
+  deleteUser as deleteFireUser,
+  ActionCodeSettings,
 } from "firebase/auth";
 
 // Initialization.
@@ -108,7 +114,6 @@ export function loginWithGoogle({ onSuccess, onFailure }: BoolBacks<User>) {
     })
     .catch((error) => {
       console.error(error);
-
       onFailure(decodeFireError(error));
     });
 }
@@ -153,7 +158,6 @@ export function loginWithEmail({
     })
     .catch((error) => {
       console.error(error);
-
       onFailure(decodeFireError(error));
     });
 }
@@ -167,7 +171,6 @@ export function loginAnonymously({ onSuccess, onFailure }: BoolBacks<User>) {
     })
     .catch((error) => {
       console.error(error);
-
       onFailure(decodeFireError(error));
     });
 }
@@ -179,7 +182,6 @@ export function logout({ onSuccess, onFailure }: BoolBacks<unknown>) {
     .then(() => onSuccess(undefined))
     .catch((error) => {
       console.error(error);
-
       onFailure(decodeFireError(error));
     });
 }
@@ -224,7 +226,165 @@ export function registerWithEmail({
     })
     .catch((error) => {
       console.error(error);
+      onFailure(decodeFireError(error));
+    });
+}
 
+/**
+ * Sends a verification email to the user.
+ *
+ * @param email User's email.
+ * @param onSuccess Callback for when the email is successfully sent.
+ * @param onFailure Callback for when the email fails to send.
+ * @param type Type of email to send.
+ *
+ * @returns void
+ *
+ * @example
+ * ```ts
+ * sendFireMail({
+ *  email: '...',
+ *  type: 'verification',
+ *  onSuccess: () => {
+ *    console.log('Email sent!')
+ *  },
+ *  onFailure: (error) => {
+ *    console.error(error)
+ *  }
+ * })
+ * ```
+ */
+export function sendMail({
+  email,
+  onSuccess,
+  onFailure,
+  type = "verification",
+  ...actionCodeSettings
+}: ActionCodeSettings &
+  BoolBacks<unknown> & {
+    email: string;
+    redirectTo?: string;
+    type: "verification" | "password-reset";
+  }) {
+  if (!isFirebaseSetup()) throwFirebaseSetupError();
+
+  if (type === "verification" && firestoreAuth.currentUser) {
+    sendEmailVerification(firestoreAuth.currentUser, actionCodeSettings)
+      .then(onSuccess)
+      .catch((error) => {
+        console.error(error);
+        onFailure(decodeFireError(error));
+      });
+    return;
+  }
+
+  if (type === "password-reset") {
+    sendPasswordResetEmail(firestoreAuth, email, actionCodeSettings)
+      .then(onSuccess)
+      .catch((error) => {
+        console.error(error);
+        onFailure(decodeFireError(error));
+      });
+  }
+}
+
+/**
+ * Updates the user's email and/or password.
+ *
+ * @param email User's email.
+ * @param password User's password.
+ * @param onSuccess Callback for when the user's credentials are successfully updated.
+ * @param onFailure Callback for when the user's credentials fail to update.
+ *
+ * @returns void
+ *
+ * @example
+ * ```ts
+ * setCredentials({
+ *  email: '...',
+ *  password: '...',
+ *  onSuccess: () => {
+ *    console.log('Credentials updated!')
+ *  },
+ *  onFailure: (error) => {
+ *    console.error(error)
+ *  }
+ * })
+ * ```
+ */
+export function setCredentials({
+  email,
+  password,
+  onSuccess,
+  onFailure,
+}: BoolBacks<unknown> & {
+  email?: string;
+  password?: string;
+}) {
+  if (!isFirebaseSetup()) throwFirebaseSetupError();
+  const user = firestoreAuth.currentUser;
+
+  // At least one of the two must be provided.
+  if (!email && !password) throw new Error(strings.DEFAULT_ERROR_MESSAGE);
+
+  // Must be logged in.
+  if (!user) throw new Error(strings.DEFAULT_ERROR_MESSAGE);
+
+  const onCatch = (error: any) => {
+    console.error(error);
+    onFailure(decodeFireError(error));
+  };
+
+  // Update both.
+  if (email && password) {
+    const emailPromise = updateEmail(user, email);
+    const passwordPromise = updatePassword(user, password);
+
+    Promise.all([emailPromise, passwordPromise]).then(onSuccess).catch(onCatch);
+    return;
+  }
+
+  // Update one.
+  if (email) {
+    updateEmail(user, email).then(onSuccess).catch(onCatch);
+  }
+
+  // Update the other.
+  if (password) {
+    updatePassword(user, password).then(onSuccess).catch(onCatch);
+  }
+}
+
+/**
+ * Deletes the user's account.
+ *
+ * @param onSuccess Callback for when the user's account is successfully deleted.
+ * @param onFailure Callback for when the user's account fails to delete.
+ *
+ * @returns void
+ *
+ * @example
+ * ```ts
+ * deleteUser({
+ *  onSuccess: () => {
+ *    console.log('User deleted!')
+ *  },
+ *  onFailure: (error) => {
+ *    console.error(error)
+ *  }
+ * })
+ * ```
+ */
+export function deleteUser({ onSuccess, onFailure }: BoolBacks<unknown>) {
+  if (!isFirebaseSetup()) throwFirebaseSetupError();
+
+  if (!firestoreAuth.currentUser)
+    throw new Error(strings.DEFAULT_ERROR_MESSAGE);
+
+  deleteFireUser(firestoreAuth.currentUser)
+    .then(onSuccess)
+    .catch((error) => {
+      console.error(error);
       onFailure(decodeFireError(error));
     });
 }
