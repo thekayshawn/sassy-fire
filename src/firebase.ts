@@ -11,6 +11,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInAnonymously,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 
 // Initialization.
@@ -183,6 +184,51 @@ export function logout({ onSuccess, onFailure }: BoolBacks<unknown>) {
     });
 }
 
+/**
+ * Registers a user with email and password.
+ *
+ * @param email User's email.
+ * @param password User's password.
+ * @param onSuccess Callback for when the user successfully registers.
+ * @param onFailure Callback for when the user fails to register.
+ *
+ * @returns void
+ *
+ * @example
+ * ```ts
+ * registerWithEmail({
+ *  email: '...',
+ *  password: '...',
+ *  onSuccess: (user) => {
+ *   console.log(user)
+ *  },
+ *  onFailure: (error) => {
+ *   console.error(error)
+ *  }
+ * })
+ */
+export function registerWithEmail({
+  email,
+  password,
+  onSuccess,
+  onFailure,
+}: {
+  email: string;
+  password: string;
+} & BoolBacks<User>) {
+  if (!isFirebaseSetup()) throwFirebaseSetupError();
+
+  createUserWithEmailAndPassword(firestoreAuth, email, password)
+    .then((userCredential) => {
+      onSuccess(userCredential.user);
+    })
+    .catch((error) => {
+      console.error(error);
+
+      onFailure(decodeFireError(error));
+    });
+}
+
 export function observeUser({
   onLogin,
   onLogout,
@@ -242,6 +288,16 @@ export function decodeFireError(error: {
       return {
         error: code,
         message: "Incorrect password.",
+      };
+    case "auth/email-already-in-use":
+      return {
+        error: code,
+        message: "This email is already in use.",
+      };
+    case "auth/popup-blocked":
+      return {
+        error: code,
+        message: "Please allow popups to continue.",
       };
     default:
       return {
