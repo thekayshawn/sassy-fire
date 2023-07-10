@@ -1,5 +1,11 @@
 # Contributing
 
+## 1.3.0
+
+### Minor Changes
+
+- e8e6010: updated wahm, fire, and react
+
 ## 1.2.0
 
 ### Minor Changes
