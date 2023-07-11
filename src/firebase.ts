@@ -258,22 +258,21 @@ export function sendMail({
   email,
   onSuccess,
   onFailure,
-  type = "verification",
+  type = "email-verification",
   ...actionCodeSettings
 }: ActionCodeSettings &
-  BoolBacks<unknown> & {
+  Partial<BoolBacks<unknown>> & {
     email: string;
-    redirectTo?: string;
-    type: "verification" | "password-reset";
+    type?: "email-verification" | "password-reset";
   }) {
   if (!isFirebaseSetup()) throwFirebaseSetupError();
 
-  if (type === "verification" && firestoreAuth.currentUser) {
+  if (type === "email-verification" && firestoreAuth.currentUser) {
     sendEmailVerification(firestoreAuth.currentUser, actionCodeSettings)
       .then(onSuccess)
       .catch((error) => {
         console.error(error);
-        onFailure(decodeFireError(error));
+        onFailure?.(decodeFireError(error));
       });
     return;
   }
@@ -283,7 +282,7 @@ export function sendMail({
       .then(onSuccess)
       .catch((error) => {
         console.error(error);
-        onFailure(decodeFireError(error));
+        onFailure?.(decodeFireError(error));
       });
   }
 }
@@ -458,6 +457,16 @@ export function decodeFireError(error: {
       return {
         error: code,
         message: "Please allow popups to continue.",
+      };
+    case "auth/weak-password":
+      return {
+        error: code,
+        message: "Password must be at least 6 characters.",
+      };
+    case "auth/too-many-requests":
+      return {
+        error: code,
+        message: "Hold on mate, you're sending too many requests.",
       };
     default:
       return {
