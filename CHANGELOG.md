@@ -1,5 +1,17 @@
 # Contributing
 
+## 1.4.0
+
+### Minor Changes
+
+- a20fcd5: Added forgot password and email verification pages
+
+## 1.3.0
+
+### Minor Changes
+
+- e8e6010: updated wahm, fire, and react
+
 ## 1.2.0
 
 ### Minor Changes
