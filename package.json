@@ -1,13 +1,12 @@
 {
   "name": "@sassy-js/fire",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Sassy Fire is a powerful library of tools designed to help you build sleek and stylish applications with Firebase. With Sassy Fire, you can create dynamic, scalable, and performant apps that are sure to impress your users.",
-  "main": "src/index.ts",
   "keywords": [],
   "author": {
     "name": "Kashan Ahmad",
     "url": "https://kashanahmad.me",
-    "email": "kashan.aech.620@gmail.com"
+    "email": "hi@kashanahmad.me"
   },
   "repository": {
     "type": "git",
@@ -19,7 +18,9 @@
     "lint:fix": "eslint . --fix",
     "format": "pnpm run lint:fix && prettier --write .",
     "dev": "tsc -w",
-    "build": "pnpm run format && tsc",
+    "build": "tsc",
+    "commit": "git add .",
+    "push": "git push --follow-tags",
     "release:migrate": "cp package.json LICENSE README.md CHANGELOG.md CONTRIBUTING.md dist",
     "release:version": "npx changeset version && pnpm run release:migrate",
     "release:prepare": "pnpm run build && pnpm run release:version",
@@ -43,5 +44,6 @@
   },
   "dependencies": {
     "firebase": "^9.19.1"
-  }
+  },
+  "main": "src/index.ts"
 }

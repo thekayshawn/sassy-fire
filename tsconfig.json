@@ -1,16 +1,9 @@
 {
-  "extends": "@sassy-js/tsconfig/base.json",
+  "extends": "@sassy-js/tsconfig/ts-library.json",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "rootDir": "src",
-    "target": "ESNext",
-    "module": "CommonJS",
-    "outDir": "dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "sourceMap": true,
-    "lib": ["ESNext", "dom"],
-    "types": ["node"]
-  },
-  "include": ["src/**/*", "../../apps/wahm/src/user"],
-  "exclude": ["node_modules"]
+    "outDir": "dist"
+  }
 }
