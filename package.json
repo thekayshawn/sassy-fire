@@ -19,7 +19,7 @@
     "format": "pnpm run lint:fix && prettier --write .",
     "dev": "tsc -w",
     "build": "tsc",
-    "commit": "git add . && git commit -m \"build: release prepared\"",
+    "commit": "git add . && if [[ $(git status --porcelain) ]]; then git commit -m 'build: release prepared'; else echo 'No changes to commit'; fi",
     "push": "git push --follow-tags",
     "release:migrate": "cp package.json LICENSE README.md CHANGELOG.md CONTRIBUTING.md dist",
     "release:version": "npx changeset version && pnpm run release:migrate",
