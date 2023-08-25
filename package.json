@@ -20,7 +20,7 @@
     "dev": "tsc -w",
     "build": "tsc",
     "commit": "git add . && git commit -m \"build: release prepared\"",
-    "push": "git push && git push --follow-tags",
+    "push": "git push --follow-tags",
     "release:migrate": "cp package.json LICENSE README.md CHANGELOG.md CONTRIBUTING.md dist",
     "release:version": "npx changeset version && pnpm run release:migrate",
     "release:prepare": "pnpm run build && pnpm run release:version",
